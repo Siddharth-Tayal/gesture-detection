@@ -1,101 +1,91 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useRef, useState, useEffect } from "react";
+import Webcam from "react-webcam";
+import * as handpose from "@tensorflow-models/handpose";
+import * as tf from "@tensorflow/tfjs";
+import { Button, Container, Typography, Box, CircularProgress, Paper } from "@mui/material";
+import { drawHand } from "@/components/drwaHand";
+
+const fingerNames = ["Thumb", "Index Finger", "Middle Finger", "Ring Finger", "Pinky Finger"];
+
+export default function HandGestureApp() {
+  const webcamRef = useRef(null);
+  const canvasRef = useRef(null);
+  const [modelLoaded, setModelLoaded] = useState(false);
+  const [gesture, setGesture] = useState("No Gesture Detected");
+  const [fingerPositions, setFingerPositions] = useState([]);
+
+  useEffect(() => {
+    const loadHandpose = async () => {
+      const net = await handpose.load();
+      setModelLoaded(true);
+      requestAnimationFrame(() => detect(net));
+    };
+    loadHandpose();
+  }, []);
+
+  const detect = async (net) => {
+    if (
+      webcamRef.current &&
+      webcamRef.current.video.readyState === 4
+    ) {
+      const video = webcamRef.current.video;
+      const videoWidth = video.videoWidth;
+      const videoHeight = video.videoHeight;
+
+      webcamRef.current.video.width = videoWidth;
+      webcamRef.current.video.height = videoHeight;
+
+      canvasRef.current.width = videoWidth;
+      canvasRef.current.height = videoHeight;
+
+      const hand = await net.estimateHands(video);
+      const ctx = canvasRef.current.getContext("2d");
+      ctx.clearRect(0, 0, videoWidth, videoHeight);
+
+      if (hand.length > 0) {
+        drawHand(hand, ctx);
+        setGesture("Hand Detected");
+
+        const positions = hand[0].landmarks.map((pos, index) => ({
+          finger: fingerNames[Math.floor(index / 4)],
+          position: `X: ${pos[0].toFixed(2)}, Y: ${pos[1].toFixed(2)}`
+        }));
+        setFingerPositions(positions);
+      } else {
+        setGesture("No Gesture Detected");
+        setFingerPositions([]);
+      }
+      requestAnimationFrame(() => detect(net));
+    }
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    <Container style={{ textAlign: "center", marginTop: "20px", position: "relative" }}>
+      <Typography variant="h4" gutterBottom>Hand Gesture Recognition</Typography>
+      <Box position="relative" display="inline-block">
+        <Webcam ref={webcamRef} style={{ width: 640, height: 480, borderRadius: "10px" }} />
+        <canvas ref={canvasRef} style={{ position: "absolute", top: 0, left: 0 }} />
+      </Box>
+      {!modelLoaded ? (
+        <Box mt={2} display="flex" flexDirection="column" alignItems="center">
+          <CircularProgress color="primary" />
+          <Typography variant="h6" color="textSecondary">Loading Model...</Typography>
+        </Box>
+      ) : (
+        <>
+          <Typography variant="h6" color="primary" style={{ marginTop: "10px" }}>{gesture}</Typography>
+          {fingerPositions.length > 0 && (
+            <Paper elevation={3} style={{ padding: "10px", marginTop: "10px", backgroundColor: "#f5f5f5" }}>
+              <Typography variant="h6">Finger Positions:</Typography>
+              {fingerPositions.map((fp, index) => (
+                <Typography key={index} variant="body1">{fp.finger}: {fp.position}</Typography>
+              ))}
+            </Paper>
+          )}
+        </>
+      )}
+    </Container>
   );
 }
