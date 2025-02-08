@@ -5,59 +5,71 @@ import Webcam from "react-webcam";
 import * as handpose from "@tensorflow-models/handpose";
 import * as tf from "@tensorflow/tfjs";
 import { Button, Container, Typography, Box, CircularProgress, Paper } from "@mui/material";
-import { drawHand } from "@/components/drwaHand";
+import { drawHand } from "@/components/drawHand";
+import { detectGesture } from "@/components/detectGesture";
 
-const fingerNames = ["Thumb", "Index Finger", "Middle Finger", "Ring Finger", "Pinky Finger"];
+const overlayImages = {
+  thumbsUp: "/images/thumbs_up.jpg",
+  openPalm: "/images/open_palm.jpg",
+  fist: "/images/fist.jpg",
+  victory: "/images/victory.jpg",
+};
 
 export default function HandGestureApp() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const [modelLoaded, setModelLoaded] = useState(false);
   const [gesture, setGesture] = useState("No Gesture Detected");
-  const [fingerPositions, setFingerPositions] = useState([]);
+  const [overlay, setOverlay] = useState(null);
 
   useEffect(() => {
     const loadHandpose = async () => {
-      const net = await handpose.load();
-      setModelLoaded(true);
-      requestAnimationFrame(() => detect(net));
+      try {
+        console.log("Loading HandPose model...");
+        const net = await handpose.load();
+        console.log("Model Loaded");
+        setModelLoaded(true);
+        requestAnimationFrame(() => detect(net));
+      } catch (error) {
+        console.error("Error loading model:", error);
+      }
     };
     loadHandpose();
   }, []);
 
   const detect = async (net) => {
-    if (
-      webcamRef.current &&
-      webcamRef.current.video.readyState === 4
-    ) {
-      const video = webcamRef.current.video;
-      const videoWidth = video.videoWidth;
-      const videoHeight = video.videoHeight;
+    if (!webcamRef.current || !webcamRef.current.video) return;
 
-      webcamRef.current.video.width = videoWidth;
-      webcamRef.current.video.height = videoHeight;
+    const video = webcamRef.current.video;
+    if (video.readyState !== 4) return;
 
-      canvasRef.current.width = videoWidth;
-      canvasRef.current.height = videoHeight;
+    const videoWidth = video.videoWidth;
+    const videoHeight = video.videoHeight;
 
+    webcamRef.current.video.width = videoWidth;
+    webcamRef.current.video.height = videoHeight;
+    canvasRef.current.width = videoWidth;
+    canvasRef.current.height = videoHeight;
+
+    try {
       const hand = await net.estimateHands(video);
       const ctx = canvasRef.current.getContext("2d");
       ctx.clearRect(0, 0, videoWidth, videoHeight);
 
       if (hand.length > 0) {
         drawHand(hand, ctx);
-        setGesture("Hand Detected");
-
-        const positions = hand[0].landmarks.map((pos, index) => ({
-          finger: fingerNames[Math.floor(index / 4)],
-          position: `X: ${pos[0].toFixed(2)}, Y: ${pos[1].toFixed(2)}`
-        }));
-        setFingerPositions(positions);
+        console.log("Detected hand:", hand);
+        const detectedGesture = detectGesture(hand[0].landmarks);
+        console.log("Detected Gesture:", detectedGesture);
+        setGesture(detectedGesture);
+        setOverlay(overlayImages[detectedGesture] || null);
       } else {
         setGesture("No Gesture Detected");
-        setFingerPositions([]);
+        setOverlay(null);
       }
       requestAnimationFrame(() => detect(net));
+    } catch (error) {
+      console.error("Error detecting hand:", error);
     }
   };
 
@@ -67,6 +79,19 @@ export default function HandGestureApp() {
       <Box position="relative" display="inline-block">
         <Webcam ref={webcamRef} style={{ width: 640, height: 480, borderRadius: "10px" }} />
         <canvas ref={canvasRef} style={{ position: "absolute", top: 0, left: 0 }} />
+        {overlay && (
+          <img
+            src={overlay}
+            alt="Gesture Overlay"
+            style={{
+              position: "absolute",
+              width: "150px",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+          />
+        )}
       </Box>
       {!modelLoaded ? (
         <Box mt={2} display="flex" flexDirection="column" alignItems="center">
@@ -74,17 +99,7 @@ export default function HandGestureApp() {
           <Typography variant="h6" color="textSecondary">Loading Model...</Typography>
         </Box>
       ) : (
-        <>
-          <Typography variant="h6" color="primary" style={{ marginTop: "10px" }}>{gesture}</Typography>
-          {fingerPositions.length > 0 && (
-            <Paper elevation={3} style={{ padding: "10px", marginTop: "10px", backgroundColor: "#f5f5f5" }}>
-              <Typography variant="h6">Finger Positions:</Typography>
-              {fingerPositions.map((fp, index) => (
-                <Typography key={index} variant="body1">{fp.finger}: {fp.position}</Typography>
-              ))}
-            </Paper>
-          )}
-        </>
+        <Typography variant="h6" color="primary" style={{ marginTop: "10px" }}>{gesture}</Typography>
       )}
     </Container>
   );

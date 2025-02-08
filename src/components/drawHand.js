@@ -1,11 +1,11 @@
 export const drawHand = (predictions, ctx) => {
-    if (!predictions) return;
+    if (!predictions || predictions.length === 0) return;
+
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 2;
 
     predictions.forEach(prediction => {
         const landmarks = prediction.landmarks;
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 2;
-
         for (let i = 0; i < landmarks.length; i++) {
             const [x, y] = landmarks[i];
             ctx.beginPath();

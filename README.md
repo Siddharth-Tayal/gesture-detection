@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Hand Gesture Recognition
 
-## Getting Started
+## Overview
 
-First, run the development server:
+This is a **real-time hand gesture recognition** project using **Next.js, TensorFlow.js, and HandPose**. The application detects hand keypoints and recognizes gestures, overlaying images based on the detected gestures.
+
+## Features
+
+- **Hand keypoint detection** using TensorFlow.js HandPose model
+- **Real-time gesture recognition** (Thumbs Up, Open Palm, Fist, Victory)
+- **Dynamic overlays** based on recognized gestures
+- **Built with Next.js** for optimized performance
+
+## Technologies Used
+
+- **Next.js** (React framework)
+- **TensorFlow.js** (Machine learning in the browser)
+- **HandPose Model** (Pre-trained model for hand keypoint detection)
+- **Material UI** (Modern UI components)
+- **React Webcam** (Access live webcam feed)
+
+## Installation & Setup
+
+### **1. Clone the Repository**
+
+```bash
+git clone https://github.com/Siddharth-Tayal/gesture-detection.git
+cd hand-gesture-recognition
+```
+
+### **2. Install Dependencies**
+
+```bash
+npm install
+```
+
+### **3. Start the Development Server**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Usage
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+1. Open the app in your browser (default: `http://localhost:3000`).
+2. Allow webcam access when prompted.
+3. Perform gestures in front of the camera:
+   - **Thumbs Up** 🖒 → Displays a thumbs-up image
+   - **Open Palm** ✋ → Displays an open palm image
+   - **Fist** ✊ → Displays a fist image
+   - **Victory Sign** ✌️ → Displays a victory image
+4. Watch real-time detection and overlay appear.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+```
+📂 hand-gesture-recognition
+├── 📂 components
+│   ├── drawHand.js  # Function to draw hand keypoints
+├── 📂 utils
+│   ├── detectGesture.js  # Function to classify gestures
+├── 📂 public/images  # Gesture overlay images
+├── 📜 pages/index.js  # Main application file
+├── 📜 README.md  # Project documentation
+└── 📜 package.json  # Dependencies & scripts
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Demo
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+[Upload a demo video here or link to a YouTube video]
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Troubleshooting
 
-## Deploy on Vercel
+- If the model is not loading, check the console for errors.
+- Ensure TensorFlow.js dependencies are installed properly.
+- Webcam not working? Ensure you have granted camera access.
+- Gesture not recognized? Try different hand positions.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Future Improvements
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Add more gestures (e.g., Rock, Paper, Scissors)
+- Improve gesture classification accuracy
+- Develop an Android version with React Native & TensorFlow Lite
+
+## Contributing
+
+Feel free to fork the repository, submit issues, or make pull requests.
+
+## License
+
+This project is licensed under the MIT License.
+
+## Contact
+
+**Developer:** Siddharth Tayal
+**Email:** stayal12345@gmail.com  
+**GitHub:** https://github.com/Siddharth-Tayal/
