@@ -15,6 +15,7 @@
     "@tensorflow-models/handpose": "^0.1.0",
     "@tensorflow/tfjs": "^4.22.0",
     "fingerpose": "^0.1.0",
+    "framer-motion": "^12.4.1",
     "next": "15.1.6",
     "react": "^17.0.0 || ^18.0.0 || ^19.0.0",
     "react-dom": "^17.0.0 || ^18.0.0 || ^19.0.0",

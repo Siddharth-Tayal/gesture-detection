@@ -1,19 +1,47 @@
 export const detectGesture = (landmarks) => {
-    if (!landmarks) return "No Gesture Detected";
+    if (!landmarks || landmarks.length < 21) return "No Gesture Detected";
 
-    const [thumb, index, middle, ring, pinky] = [
-        landmarks[4], landmarks[8], landmarks[12], landmarks[16], landmarks[20]
-    ];
+    const isFingerUp = (tip, base) => tip[1] < base[1];
 
-    const isThumbUp = thumb[1] < index[1] && thumb[1] < middle[1] && thumb[1] < ring[1] && thumb[1] < pinky[1];
-    const isOpenPalm = index[1] < thumb[1] && middle[1] < thumb[1] && ring[1] < thumb[1] && pinky[1] < thumb[1];
-    const isFist = Math.abs(index[1] - thumb[1]) < 20 && Math.abs(middle[1] - thumb[1]) < 20;
-    const isVictory = index[1] < thumb[1] && middle[1] < thumb[1] && ring[1] > thumb[1] && pinky[1] > thumb[1];
+    // Thumb detection: Compare x-coordinates because the thumb moves sideways
+    const isThumbUp = landmarks[4][0] > landmarks[2][0];
 
-    if (isThumbUp) return "thumbsUp";
-    if (isOpenPalm) return "openPalm";
-    if (isFist) return "fist";
-    if (isVictory) return "victory";
+    // Other fingers use y-coordinates
+    const fingers = {
+        thumb: isThumbUp,
+        index: isFingerUp(landmarks[8], landmarks[5]),
+        middle: isFingerUp(landmarks[12], landmarks[9]),
+        ring: isFingerUp(landmarks[16], landmarks[13]),
+        pinky: isFingerUp(landmarks[20], landmarks[17]),
+    };
+
+    const upFingers = Object.values(fingers).filter((up) => up).length;
+
+    // **Gesture Classification**
+    if (fingers.thumb && !fingers.index && !fingers.middle && !fingers.ring && !fingers.pinky) {
+        return "thumbsUp";
+    }
+    if (!fingers.thumb && fingers.index && !fingers.middle && !fingers.ring && !fingers.pinky) {
+        return "one";
+    }
+    if (!fingers.thumb && fingers.index && fingers.middle && !fingers.ring && !fingers.pinky) {
+        return "two";
+    }
+    if (!fingers.thumb && fingers.index && fingers.middle && fingers.ring && !fingers.pinky) {
+        return "three";
+    }
+    if (!fingers.thumb && fingers.index && fingers.middle && fingers.ring && fingers.pinky) {
+        return "four";
+    }
+    if (fingers.thumb && fingers.index && fingers.middle && fingers.ring && fingers.pinky) {
+        return "openPalm";
+    }
+    if (!fingers.thumb && !fingers.index && !fingers.middle && !fingers.ring && !fingers.pinky) {
+        return "fist";
+    }
+    if (!fingers.thumb && fingers.index && fingers.middle && !fingers.ring && !fingers.pinky) {
+        return "victory";
+    }
 
     return "No Gesture Detected";
 };

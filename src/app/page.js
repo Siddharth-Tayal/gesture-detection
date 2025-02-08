@@ -5,12 +5,17 @@ import Webcam from "react-webcam";
 import * as handpose from "@tensorflow-models/handpose";
 import * as tf from "@tensorflow/tfjs";
 import { Button, Container, Typography, Box, CircularProgress, Paper } from "@mui/material";
+import { motion } from "framer-motion";
 import { drawHand } from "@/components/drawHand";
 import { detectGesture } from "@/components/detectGesture";
 
 const overlayImages = {
   thumbsUp: "/images/thumbs_up.jpg",
-  openPalm: "/images/open_palm.jpg",
+
+  one: "/images/one-finger.jpg",
+  two: "/images/two-fingers.jpg",
+  three: "/images/three-fingers.jpg",
+  four: "/images/four-fingers.png", openPalm: "/images/open_palm.jpg",
   fist: "/images/fist.jpg",
   victory: "/images/victory.jpg",
 };
@@ -74,33 +79,114 @@ export default function HandGestureApp() {
   };
 
   return (
-    <Container style={{ textAlign: "center", marginTop: "20px", position: "relative" }}>
-      <Typography variant="h4" gutterBottom>Hand Gesture Recognition</Typography>
-      <Box position="relative" display="inline-block">
-        <Webcam ref={webcamRef} style={{ width: 640, height: 480, borderRadius: "10px" }} />
-        <canvas ref={canvasRef} style={{ position: "absolute", top: 0, left: 0 }} />
+    <Container
+      maxWidth="md"
+      sx={{
+        textAlign: "center",
+        p: 3,
+        bgcolor: "background.paper",
+        borderRadius: "15px",
+        boxShadow: 3,
+      }}
+    >
+      <Typography variant="h4" fontWeight={600} color="primary" gutterBottom>
+        Hand Gesture Recognition ✋
+      </Typography>
+
+      <Box sx={{ position: "relative", display: "inline-block", borderRadius: "10px" }}>
+        <Webcam
+          ref={webcamRef}
+          style={{
+            width: 640,
+            height: 480,
+            borderRadius: "10px",
+            border: "3px solid #1976d2",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+          }}
+        />
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            borderRadius: "10px",
+          }}
+        />
         {overlay && (
-          <img
+          <motion.img
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
             src={overlay}
             alt="Gesture Overlay"
             style={{
               position: "absolute",
-              width: "150px",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
+              width: "120px",
+              top: "20px",
+              right: "20px",
+              borderRadius: "10px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+              backgroundColor: "white",
+              padding: "8px",
             }}
           />
         )}
       </Box>
+
       {!modelLoaded ? (
-        <Box mt={2} display="flex" flexDirection="column" alignItems="center">
+        <Box mt={3} display="flex" flexDirection="column" alignItems="center">
           <CircularProgress color="primary" />
-          <Typography variant="h6" color="textSecondary">Loading Model...</Typography>
+          <Typography variant="h6" color="textSecondary">
+            Loading Model...
+          </Typography>
         </Box>
       ) : (
-        <Typography variant="h6" color="primary" style={{ marginTop: "10px" }}>{gesture}</Typography>
+        <motion.div
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Paper
+            elevation={3}
+            sx={{
+              mt: 2,
+              p: 2,
+              display: "inline-block",
+              borderRadius: "10px",
+              bgcolor: "primary.main",
+              color: "white",
+            }}
+          >
+            <Typography variant="h6" fontWeight={500}>
+              {gesture}
+            </Typography>
+          </Paper>
+        </motion.div>
       )}
+
+      <Button
+        variant="contained"
+        color="primary"
+        sx={{
+          mt: 3,
+          borderRadius: "8px",
+          fontSize: "16px",
+          fontWeight: 600,
+          px: 3,
+          py: 1.5,
+          textTransform: "none",
+          transition: "all 0.3s ease",
+          "&:hover": {
+            bgcolor: "secondary.main",
+            transform: "scale(1.05)",
+          },
+        }}
+      >
+        Restart Detection
+      </Button>
     </Container>
   );
 }
