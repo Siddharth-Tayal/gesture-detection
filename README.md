@@ -25,7 +25,7 @@ This is a **real-time hand gesture recognition** project using **Next.js, Tensor
 
 ```bash
 git clone https://github.com/Siddharth-Tayal/gesture-detection.git
-cd hand-gesture-recognition
+cd gesture-detection
 ```
 
 ### **2. Install Dependencies**
@@ -54,20 +54,22 @@ npm run dev
 ## Project Structure
 
 ```
-📂 hand-gesture-recognition
-├── 📂 components
-│   ├── drawHand.js  # Function to draw hand keypoints
-├── 📂 utils
-│   ├── detectGesture.js  # Function to classify gestures
+📂 gesture-detection
+|
 ├── 📂 public/images  # Gesture overlay images
-├── 📜 pages/index.js  # Main application file
+├── 📂 src
+├───── 📂 components
+│      ├── drawHand.js  # Function to draw hand keypoints
+│      ├── detectGesture.js  # Function to classify gestures
+├───── 📂app
+│      ├── page.jsx  # Main application file
 ├── 📜 README.md  # Project documentation
 └── 📜 package.json  # Dependencies & scripts
 ```
 
 ## Demo
 
-[Upload a demo video here or link to a YouTube video]
+gesture-detection-kappa.vercel.app
 
 ## Troubleshooting
 
