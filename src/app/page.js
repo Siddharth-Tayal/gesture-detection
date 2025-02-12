@@ -81,11 +81,7 @@ export default function HandGestureApp() {
 
   const toggleCamera = () => {
     setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
-    setTimeout(() => {
-      if (webcamRef.current && webcamRef.current.video) {
-        requestAnimationFrame(() => detect(modelLoaded));
-      }
-    }, 1000);
+    detect(modelLoaded)
   };
 
   return (
