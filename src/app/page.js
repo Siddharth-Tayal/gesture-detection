@@ -11,11 +11,11 @@ import { detectGesture } from "@/components/detectGesture";
 
 const overlayImages = {
   thumbsUp: "/images/thumbs_up.jpg",
-
   one: "/images/one-finger.jpg",
   two: "/images/two-fingers.jpg",
   three: "/images/three-fingers.jpg",
-  four: "/images/four-fingers.png", openPalm: "/images/open_palm.jpg",
+  four: "/images/four-fingers.png",
+  openPalm: "/images/open_palm.jpg",
   fist: "/images/fist.jpg",
   victory: "/images/victory.jpg",
 };
@@ -26,7 +26,7 @@ export default function HandGestureApp() {
   const [modelLoaded, setModelLoaded] = useState(false);
   const [gesture, setGesture] = useState("No Gesture Detected");
   const [overlay, setOverlay] = useState(null);
-  const [facingMode, setFacingMode] = useState("user")
+  const [facingMode, setFacingMode] = useState("user");
 
   useEffect(() => {
     const loadHandpose = async () => {
@@ -78,37 +78,43 @@ export default function HandGestureApp() {
       console.error("Error detecting hand:", error);
     }
   };
+
   const toggleCamera = () => {
     setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
   };
 
-
   return (
     <Container
-      maxWidth="md"
+      maxWidth={false}
       sx={{
-        textAlign: "center",
-        p: 3,
-        bgcolor: "background.paper",
-        borderRadius: "15px",
-        boxShadow: 3,
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        bgcolor: "background.default",
       }}
     >
       <Typography variant="h4" fontWeight={600} color="primary" gutterBottom>
         Hand Gesture Recognition ✋
       </Typography>
 
-      <Box sx={{ position: "relative", display: "inline-block", borderRadius: "10px" }}>
+      <Box
+        sx={{
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: "10px",
+          overflow: "hidden",
+          boxShadow: 3,
+        }}
+      >
         <Webcam
           ref={webcamRef}
           videoConstraints={{ facingMode: facingMode }}
-          style={{
-            width: 640,
-            height: 480,
-            borderRadius: "10px",
-            border: "3px solid #1976d2",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-          }}
+          style={{ width: "640px", height: "480px", borderRadius: "10px" }}
         />
         <canvas
           ref={canvasRef}
@@ -118,7 +124,6 @@ export default function HandGestureApp() {
             left: 0,
             width: "100%",
             height: "100%",
-            borderRadius: "10px",
           }}
         />
         {overlay && (
@@ -150,51 +155,13 @@ export default function HandGestureApp() {
           </Typography>
         </Box>
       ) : (
-        <motion.div
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Paper
-            elevation={3}
-            sx={{
-              mt: 2,
-              p: 2,
-              display: "inline-block",
-              borderRadius: "10px",
-              bgcolor: "primary.main",
-              color: "white",
-            }}
-          >
-            <Typography variant="h6" fontWeight={500}>
-              {gesture}
-            </Typography>
-          </Paper>
-        </motion.div>
+        <Paper elevation={3} sx={{ mt: 2, p: 2, bgcolor: "primary.main", color: "white", borderRadius: "10px" }}>
+          <Typography variant="h6" fontWeight={500}>{gesture}</Typography>
+        </Paper>
       )}
 
-      <Button
-        variant="contained"
-        color="primary"
-        sx={{
-          mt: 3,
-          borderRadius: "8px",
-          fontSize: "16px",
-          fontWeight: 600,
-          px: 3,
-          py: 1.5,
-          textTransform: "none",
-          transition: "all 0.3s ease",
-          "&:hover": {
-            bgcolor: "secondary.main",
-            transform: "scale(1.05)",
-          },
-        }}
-      >
-        Restart Detection
-      </Button>
-      <Box mt={3} display="flex" justifyContent="center" gap={2}>
-        <Button variant="contained" color="primary" onClick={toggleCamera} sx={{ borderRadius: "8px", fontSize: "16px", fontWeight: 600, px: 3, py: 1.5, textTransform: "none", transition: "all 0.3s ease", "&:hover": { bgcolor: "secondary.main", transform: "scale(1.05)" } }}>
+      <Box mt={3} display="flex" gap={2}>
+        <Button variant="contained" color="primary" onClick={toggleCamera}>
           Switch Camera
         </Button>
       </Box>
