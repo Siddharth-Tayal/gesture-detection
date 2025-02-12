@@ -26,6 +26,7 @@ export default function HandGestureApp() {
   const [modelLoaded, setModelLoaded] = useState(false);
   const [gesture, setGesture] = useState("No Gesture Detected");
   const [overlay, setOverlay] = useState(null);
+  const [facingMode, setFacingMode] = useState("user")
 
   useEffect(() => {
     const loadHandpose = async () => {
@@ -77,6 +78,10 @@ export default function HandGestureApp() {
       console.error("Error detecting hand:", error);
     }
   };
+  const toggleCamera = () => {
+    setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
+  };
+
 
   return (
     <Container
@@ -96,6 +101,7 @@ export default function HandGestureApp() {
       <Box sx={{ position: "relative", display: "inline-block", borderRadius: "10px" }}>
         <Webcam
           ref={webcamRef}
+          videoConstraints={{ facingMode: facingMode }}
           style={{
             width: 640,
             height: 480,
@@ -187,6 +193,11 @@ export default function HandGestureApp() {
       >
         Restart Detection
       </Button>
+      <Box mt={3} display="flex" justifyContent="center" gap={2}>
+        <Button variant="contained" color="primary" onClick={toggleCamera} sx={{ borderRadius: "8px", fontSize: "16px", fontWeight: 600, px: 3, py: 1.5, textTransform: "none", transition: "all 0.3s ease", "&:hover": { bgcolor: "secondary.main", transform: "scale(1.05)" } }}>
+          Switch Camera
+        </Button>
+      </Box>
     </Container>
   );
 }
