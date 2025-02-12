@@ -34,7 +34,7 @@ export default function HandGestureApp() {
         console.log("Loading HandPose model...");
         const net = await handpose.load();
         console.log("Model Loaded");
-        setModelLoaded(true);
+        setModelLoaded(net);
         requestAnimationFrame(() => detect(net));
       } catch (error) {
         console.error("Error loading model:", error);
@@ -81,6 +81,11 @@ export default function HandGestureApp() {
 
   const toggleCamera = () => {
     setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
+    setTimeout(() => {
+      if (webcamRef.current && webcamRef.current.video) {
+        requestAnimationFrame(() => detect(modelLoaded));
+      }
+    }, 1000);
   };
 
   return (
@@ -95,7 +100,7 @@ export default function HandGestureApp() {
         bgcolor: "background.default",
       }}
     >
-      <Typography variant="h4" fontWeight={600} color="primary" gutterBottom>
+      <Typography variant="h4" fontWeight={600} color="primary" className=" text-center" gutterBottom>
         Hand Gesture Recognition ✋
       </Typography>
 
