@@ -27,19 +27,18 @@ export default function HandGestureApp() {
   const [gesture, setGesture] = useState("No Gesture Detected");
   const [overlay, setOverlay] = useState(null);
   const [facingMode, setFacingMode] = useState("user");
-
+  const loadHandpose = async () => {
+    try {
+      console.log("Loading HandPose model...");
+      const net = await handpose.load();
+      console.log("Model Loaded");
+      setModelLoaded(net);
+      requestAnimationFrame(() => detect(net));
+    } catch (error) {
+      console.error("Error loading model:", error);
+    }
+  };
   useEffect(() => {
-    const loadHandpose = async () => {
-      try {
-        console.log("Loading HandPose model...");
-        const net = await handpose.load();
-        console.log("Model Loaded");
-        setModelLoaded(net);
-        requestAnimationFrame(() => detect(net));
-      } catch (error) {
-        console.error("Error loading model:", error);
-      }
-    };
     loadHandpose();
   }, []);
 
@@ -81,7 +80,7 @@ export default function HandGestureApp() {
 
   const toggleCamera = () => {
     setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
-    detect(modelLoaded)
+    loadHandpose();
   };
 
   return (
