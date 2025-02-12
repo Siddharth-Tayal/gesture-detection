@@ -29,19 +29,14 @@ export default function HandGestureApp() {
   const [facingMode, setFacingMode] = useState("user");
   const loadHandpose = async () => {
     try {
-      console.log("Loading HandPose model...");
+      setModelLoaded(null)
       const net = await handpose.load();
-      console.log("Model Loaded");
       setModelLoaded(net);
       requestAnimationFrame(() => detect(net));
     } catch (error) {
       console.error("Error loading model:", error);
     }
   };
-  useEffect(() => {
-    loadHandpose();
-  }, []);
-
   const detect = async (net) => {
     if (!webcamRef.current || !webcamRef.current.video) return;
 
@@ -82,6 +77,10 @@ export default function HandGestureApp() {
     setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
     loadHandpose();
   };
+
+  useEffect(() => {
+    loadHandpose();
+  }, []);
 
   return (
     <Container
@@ -155,13 +154,13 @@ export default function HandGestureApp() {
           </Typography>
         </Box>
       ) : (
-        <Paper elevation={3} sx={{ mt: 2, p: 2, bgcolor: "primary.main", color: "white", borderRadius: "10px" }}>
-          <Typography variant="h6" fontWeight={500}>{gesture}</Typography>
+        <Paper elevation={3} sx={{ mt: 2, textAlign: "center", p: 1, bgcolor: "primary.main", color: "white", borderRadius: "10px" }}>
+          <Typography variant="h6" fontWeight={500} className="  capitalize w-[250px]">{gesture}</Typography>
         </Paper>
       )}
 
       <Box mt={3} display="flex" gap={2}>
-        <Button variant="contained" color="primary" onClick={toggleCamera}>
+        <Button variant="contained" color="primary" className=" capitalize w-[250px]" onClick={toggleCamera}>
           Switch Camera
         </Button>
       </Box>

@@ -1,7 +1,6 @@
 export const drawHand = (predictions, ctx) => {
     if (!predictions || predictions.length === 0) return;
 
-    // Define the connections between landmarks to form the hand skeleton
     const fingerJoints = {
         thumb: [0, 1, 2, 3, 4],
         indexFinger: [0, 5, 6, 7, 8],
@@ -10,13 +9,23 @@ export const drawHand = (predictions, ctx) => {
         pinky: [0, 17, 18, 19, 20],
     };
 
-    // Set line properties
+    const fingerIndexes = [4, 8, 12, 16, 20];
+
     ctx.strokeStyle = "red";
     ctx.lineWidth = 2;
+    ctx.fillStyle = "white";
+    ctx.font = "14px Arial";
 
-    // Loop through each prediction
     predictions.forEach((prediction) => {
         const landmarks = prediction.landmarks;
+        const raisedFingers = [];
+
+        // Determine raised fingers
+        for (let i = 0; i < 5; i++) {
+            if (landmarks[fingerIndexes[i]][1] < landmarks[fingerIndexes[i] - 2][1]) {
+                raisedFingers.push({ index: i + 1, pos: landmarks[fingerIndexes[i]] });
+            }
+        }
 
         // Draw the skeleton
         for (let finger in fingerJoints) {
@@ -32,12 +41,17 @@ export const drawHand = (predictions, ctx) => {
         }
 
         // Draw the landmarks
-        landmarks.forEach((landmark) => {
-            const [x, y] = landmark;
+        landmarks.forEach(([x, y]) => {
             ctx.beginPath();
             ctx.arc(x, y, 5, 0, 2 * Math.PI);
             ctx.fillStyle = "blue";
             ctx.fill();
+        });
+
+        // Draw labels only on raised fingers
+        raisedFingers.forEach(({ index, pos }) => {
+            const [x, y] = pos;
+            ctx.fillText(index, x, y - 15);
         });
     });
 };
