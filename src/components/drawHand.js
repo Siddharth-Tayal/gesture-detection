@@ -1,57 +1,69 @@
 export const drawHand = (predictions, ctx) => {
     if (!predictions || predictions.length === 0) return;
 
-    const fingerJoints = {
-        thumb: [0, 1, 2, 3, 4],
-        indexFinger: [0, 5, 6, 7, 8],
-        middleFinger: [0, 9, 10, 11, 12],
-        ringFinger: [0, 13, 14, 15, 16],
-        pinky: [0, 17, 18, 19, 20],
-    };
-
-    const fingerIndexes = [4, 8, 12, 16, 20];
-
-    ctx.strokeStyle = "red";
-    ctx.lineWidth = 2;
-    ctx.fillStyle = "white";
-    ctx.font = "14px Arial";
+    const isFingerUp = (tip, base) => tip[1] < base[1];
 
     predictions.forEach((prediction) => {
         const landmarks = prediction.landmarks;
-        const raisedFingers = [];
+        if (!landmarks || landmarks.length < 21) return; // Safety check
 
-        // Determine raised fingers
-        for (let i = 0; i < 5; i++) {
-            if (landmarks[fingerIndexes[i]][1] < landmarks[fingerIndexes[i] - 2][1]) {
-                raisedFingers.push({ index: i + 1, pos: landmarks[fingerIndexes[i]] });
-            }
-        }
+        // Thumb detection (x-coordinates for sideways movement)
+        const isThumbUp = landmarks[4][0] > landmarks[2][0];
 
-        // Draw the skeleton
-        for (let finger in fingerJoints) {
-            const points = fingerJoints[finger];
+        // Other fingers use y-coordinates
+        const fingers = {
+            thumb: isThumbUp,
+            index: isFingerUp(landmarks[8], landmarks[5]),
+            middle: isFingerUp(landmarks[12], landmarks[9]),
+            ring: isFingerUp(landmarks[16], landmarks[13]),
+            pinky: isFingerUp(landmarks[20], landmarks[17]),
+        };
+
+        // Finger connection points
+        const fingerJoints = {
+            thumb: [0, 1, 2, 3, 4],
+            index: [0, 5, 6, 7, 8],
+            middle: [0, 9, 10, 11, 12],
+            ring: [0, 13, 14, 15, 16],
+            pinky: [0, 17, 18, 19, 20],
+        };
+
+        // Drawing settings
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 2;
+        ctx.fillStyle = "white";
+        ctx.font = "14px Arial";
+
+        // Draw the skeleton (finger connections)
+        Object.values(fingerJoints).forEach((points) => {
             ctx.beginPath();
             for (let i = 0; i < points.length - 1; i++) {
-                const start = landmarks[points[i]];
-                const end = landmarks[points[i + 1]];
-                ctx.moveTo(start[0], start[1]);
-                ctx.lineTo(end[0], end[1]);
+                const [x1, y1] = landmarks[points[i]];
+                const [x2, y2] = landmarks[points[i + 1]];
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
             }
             ctx.stroke();
-        }
+        });
 
-        // Draw the landmarks
-        landmarks.forEach(([x, y]) => {
+        // Draw landmarks and raised finger labels
+        let raisedFingerIndex = 1;
+        landmarks.forEach(([x, y], i) => {
             ctx.beginPath();
             ctx.arc(x, y, 5, 0, 2 * Math.PI);
             ctx.fillStyle = "blue";
             ctx.fill();
-        });
 
-        // Draw labels only on raised fingers
-        raisedFingers.forEach(({ index, pos }) => {
-            const [x, y] = pos;
-            ctx.fillText(index, x, y - 15);
+            // Label raised fingers
+            if (
+                (i === 4 && fingers.thumb) ||
+                (i === 8 && fingers.index) ||
+                (i === 12 && fingers.middle) ||
+                (i === 16 && fingers.ring) ||
+                (i === 20 && fingers.pinky)
+            ) {
+                ctx.fillText(raisedFingerIndex++, x, y - 15);
+            }
         });
     });
 };
