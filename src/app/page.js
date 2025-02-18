@@ -27,9 +27,11 @@ export default function HandGestureApp() {
   const [gesture, setGesture] = useState("No Gesture Detected");
   const [overlay, setOverlay] = useState(null);
   const [facingMode, setFacingMode] = useState("user");
+  const [palmPosition, setPalmPosition] = useState({ x: 0, y: 0 });
+
   const loadHandpose = async () => {
     try {
-      setModelLoaded(null)
+      setModelLoaded(null);
       const net = await handpose.load();
       setModelLoaded(net);
       requestAnimationFrame(() => detect(net));
@@ -37,6 +39,7 @@ export default function HandGestureApp() {
       console.error("Error loading model:", error);
     }
   };
+
   const detect = async (net) => {
     if (!webcamRef.current || !webcamRef.current.video) return;
 
@@ -63,6 +66,13 @@ export default function HandGestureApp() {
         console.log("Detected Gesture:", detectedGesture);
         setGesture(detectedGesture);
         setOverlay(overlayImages[detectedGesture] || null);
+
+        // Extract palm base position (landmark index 0 or 9)
+        const palmLandmark = hand[0].landmarks[0]; // or use 9 for more accuracy
+        setPalmPosition({
+          x: palmLandmark[0],
+          y: palmLandmark[1],
+        });
       } else {
         setGesture("No Gesture Detected");
         setOverlay(null);
@@ -94,7 +104,7 @@ export default function HandGestureApp() {
         bgcolor: "background.default",
       }}
     >
-      <Typography variant="h4" fontWeight={600} color="primary" className=" text-center" gutterBottom>
+      <Typography variant="h4" fontWeight={600} color="primary" className="text-center" gutterBottom>
         Hand Gesture Recognition ✋
       </Typography>
 
@@ -134,9 +144,9 @@ export default function HandGestureApp() {
             alt="Gesture Overlay"
             style={{
               position: "absolute",
-              width: "120px",
-              top: "20px",
-              right: "20px",
+              width: "100px",
+              left: `${palmPosition.x}px`,
+              top: `${palmPosition.y + 50}px`, transform: "translate(-50%, -50%)",
               borderRadius: "10px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
               backgroundColor: "white",
@@ -154,13 +164,25 @@ export default function HandGestureApp() {
           </Typography>
         </Box>
       ) : (
-        <Paper elevation={3} sx={{ mt: 2, textAlign: "center", p: 1, bgcolor: "primary.main", color: "white", borderRadius: "10px" }}>
-          <Typography variant="h6" fontWeight={500} className="  capitalize w-[250px]">{gesture}</Typography>
+        <Paper
+          elevation={3}
+          sx={{
+            mt: 2,
+            textAlign: "center",
+            p: 1,
+            bgcolor: "primary.main",
+            color: "white",
+            borderRadius: "10px",
+          }}
+        >
+          <Typography variant="h6" fontWeight={500} className="capitalize w-[250px]">
+            {gesture}
+          </Typography>
         </Paper>
       )}
 
       <Box mt={3} display="flex" gap={2}>
-        <Button variant="contained" color="primary" className=" capitalize w-[250px]" onClick={toggleCamera}>
+        <Button variant="contained" color="primary" className="capitalize w-[250px]" onClick={toggleCamera}>
           Switch Camera
         </Button>
       </Box>
